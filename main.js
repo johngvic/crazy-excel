@@ -5,17 +5,20 @@ const invoke = async () => {
     const encounteredFile = fs.readdirSync('.').find((file) => file.endsWith('.xlsx'));
 
     if (!encounteredFile) {
-        console.log('Could not find XLSX file')
-        return
+        console.log('Could not find XLSX file');
+        return;
     }
 
-    const inputWorkbook = new xlsx.readFile(encounteredFile)
+    console.log('Start processing...');
+
+    const inputWorkbook = new xlsx.readFile(encounteredFile, { dense: true });
     const outputWorkbook = xlsx.utils.book_new();
     const sheets = inputWorkbook.SheetNames;
 
     for (const sheet of sheets) {
-        const rows = xlsx.utils.sheet_to_json(inputWorkbook.Sheets[sheet], { header: 1 })
-        const rawObjs = []
+        console.log(`Processing tab sheet "${sheet}"`);
+        const rows = xlsx.utils.sheet_to_json(inputWorkbook.Sheets[sheet], { header: 1 });
+        const rawObjs = [];
 
         rows.forEach((row, rowIndex) => {
             const auxObj = {}
@@ -59,11 +62,11 @@ const invoke = async () => {
             rawObjs.push(auxObj)
         });
 
-        const worksheet = xlsx.utils.json_to_sheet(rawObjs)
+        const worksheet = xlsx.utils.json_to_sheet(rawObjs);
         xlsx.utils.book_append_sheet(outputWorkbook, worksheet, sheet);
     }
-    
+
     xlsx.writeFile(outputWorkbook, "OutputSheet.xlsx");
 }
 
-invoke()
+invoke();
