@@ -1,1 +1,1 @@
-# crazy-excel
+# Crazy Excel

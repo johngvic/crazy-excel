@@ -1,5 +1,6 @@
 const xlsx = require('xlsx');
 const fs = require('fs');
+const uuid = require('uuid');
 
 const invoke = async () => {
     const encounteredFile = fs.readdirSync('.').find((file) => file.endsWith('.xlsx'));
@@ -12,11 +13,12 @@ const invoke = async () => {
     console.log(`Found ${encounteredFile}. Start processing...`);
 
     const inputWorkbook = new xlsx.readFile(encounteredFile, { dense: true });
-    const outputWorkbook = xlsx.utils.book_new();
     const sheets = inputWorkbook.SheetNames;
 
     for (const sheet of sheets) {
         console.log(`\nProcessing tab sheet "${sheet}"`);
+        const outputWorkbook = xlsx.utils.book_new();
+        const workbookId = uuid.v4()
         const rows = xlsx.utils.sheet_to_json(inputWorkbook.Sheets[sheet], { header: 1 });
         const rawObjs = [];
 
@@ -66,9 +68,8 @@ const invoke = async () => {
 
         const worksheet = xlsx.utils.json_to_sheet(rawObjs);
         xlsx.utils.book_append_sheet(outputWorkbook, worksheet, sheet);
+        xlsx.writeFile(outputWorkbook, `${workbookId}.xlsx`);
     }
-
-    xlsx.writeFile(outputWorkbook, "OutputSheet.xlsx");
 }
 
 invoke();
